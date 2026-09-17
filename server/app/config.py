@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # Por padrão, conecta ao PostgreSQL em localhost:5434 (mapeado pelo docker-compose)
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
-        "postgresql://postgres:postgres@localhost:5434/audiodb"
+        "postgresql://postgres:postgres@localhost:5432/audiodb"
     )
     
     # Diretórios de Armazenamento
