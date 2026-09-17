@@ -1,28 +1,78 @@
+# ==========================
 # Ambientes Virtuais
+# ==========================
+
 .venv/
 venv/
 ENV/
 env/
 
-# Python cache
+
+# ==========================
+# Python
+# ==========================
+
 __pycache__/
 *.py[cod]
 *$py.class
-*.pytest_cache/
+.pytest_cache/
 
-# Arquivos de dados temporários e bancos SQLite locais
+
+# ==========================
+# Bancos locais
+# ==========================
+
 *.db
 *.sqlite3
 tests_temp_audio.db
 
-# Storage de áudios gerados pelo servidor (mantendo estrutura de diretórios)
+
+# ==========================
+# Storage gerado
+# ==========================
+
 server/storage/20*
 server/storage/trash/*
 !server/storage/trash/.gitkeep
 
-# Arquivos de ambiente
+server/storage/**/*.mp3
+server/storage/**/*.wav
+server/storage/**/*.ogg
+server/storage/**/*.flac
+
+
+# ==========================
+# Ambiente
+# ==========================
+
 .env
 
+
+# ==========================
 # Logs
+# ==========================
+
 *.log
 
+
+# ==========================
+# Temporários
+# ==========================
+
+*.tmp
+*.temp
+
+
+# ==========================
+# IDE
+# ==========================
+
+.vscode/
+
+
+# ==========================
+# Windows
+# ==========================
+
+Thumbs.db
+Desktop.ini
