@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidor de Áudio - Arquivos Armazenados</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --accent: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .badge {
+            background-color: var(--primary);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .upload-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .upload-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input[type="file"], select, input[type="text"], input[type="number"] {
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="file"]:focus, select:focus, input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        button.btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            height: 42px;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .audio-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .audio-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+
+        .audio-card:hover {
+            border-color: #475569;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .audio-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .audio-uuid {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .meta-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.4rem;
+        }
+
+        .tag {
+            background-color: #334155;
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .tag-proc {
+            background-color: #3b0764;
+            color: #d8b4fe;
+            border: 1px solid #6b21a8;
+            font-weight: 600;
+        }
+
+        .waveform-container {
+            width: 100%;
+            background-color: #090d16;
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid #1e293b;
+        }
+
+        .waveform-container img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .player-box {
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .player-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        audio {
+            width: 100%;
+            height: 38px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            border-top: 1px solid #334155;
+            padding-top: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-sm {
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            background-color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .btn-sm:hover {
+            background-color: #334155;
+        }
+
+        .btn-danger {
+            color: #fca5a5;
+            border-color: #7f1d1d;
+        }
+
+        .btn-danger:hover {
+            background-color: #7f1d1d;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .links-bar a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+
+        .links-bar a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>
+                    <span>🎵 Servidor de Processamento de Áudio</span>
+                    <span class="badge">FastAPI + FFmpeg</span>
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">
+                    Camada 2 - Repositório de arquivos e histórico de transformações
+                </p>
+            </div>
+            <div class="links-bar">
+                <a href="/docs" target="_blank">📄 Swagger API Docs</a>
+                <a href="/audios" target="_blank">🔍 JSON API (/audios)</a>
+            </div>
+        </header>
+
+        <!-- Seção de Envio Rápido / Demonstração Web -->
+        <section class="upload-section">
+            <h2>📤 Processar Novo Áudio via Web</h2>
+            <form action="/process-audio" method="post" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="file">Arquivo de Áudio (.mp3, .wav, .ogg, .flac, .aac):</label>
+                    <input type="file" id="file" name="file" accept="audio/*" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="processing_type">Operação de Processamento:</label>
+                    <select id="processing_type" name="processing_type" onchange="handleOperationChange()">
+                        <option value="normalize_volume">Normalização de Volume</option>
+                        <option value="mono">Conversão para Mono</option>
+                        <option value="speed">Alteração de Velocidade</option>
+                        <option value="bitrate">Redução de Bitrate</option>
+                        <option value="format_conversion">Conversão de Formato</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="speedGroup" style="display: none;">
+                    <label for="speed_factor">Fator de Velocidade:</label>
+                    <select id="speed_factor" name="speed_factor">
+                        <option value="0.5">0.5x (Lento)</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5" selected>1.5x (Rápido)</option>
+                        <option value="2.0">2.0x (Dobro)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="bitrateGroup" style="display: none;">
+                    <label for="target_bitrate">Taxa de Bits Alvo:</label>
+                    <select id="target_bitrate" name="target_bitrate">
+                        <option value="64k" selected>64 kbps (Econômico)</option>
+                        <option value="96k">96 kbps</option>
+                        <option value="128k">128 kbps</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="formatGroup" style="display: none;">
+                    <label for="target_format">Formato de Saída:</label>
+                    <select id="target_format" name="target_format">
+                        <option value="mp3">MP3</option>
+                        <option value="wav">WAV</option>
+                        <option value="ogg">OGG</option>
+                        <option value="flac">FLAC</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" id="btnSubmit">
+                    ⚡ Processar e Armazenar
+                </button>
+            </form>
+        </section>
+
+        <!-- Listagem dos Áudios -->
+        <section>
+            <h2 style="font-size: 1.3rem; margin-bottom: 1.2rem;">
+                📁 Áudios Armazenados ({{ audios|length }})
+            </h2>
+
+            {% if audios %}
+                <div class="audio-list">
+                    {% for item in audios %}
+                        <div class="audio-card" id="card-{{ item.id }}">
+                            <div class="card-header">
+                                <div>
+                                    <div class="audio-title">{{ item.original_name }}</div>
+                                    <div class="audio-uuid">UUID: {{ item.id }}</div>
+                                    <div class="meta-tags">
+                                        <span class="tag tag-proc">⚡ {{ item.processing_type }}</span>
+                                        <span class="tag">⏱️ {{ "%.2f"|format(item.duration_sec) if item.duration_sec else "N/A" }} s</span>
+                                        <span class="tag">🎚️ {{ item.sample_rate if item.sample_rate else "N/A" }} Hz</span>
+                                        <span class="tag">🔊 {{ "Mono" if item.channels == 1 else "Stereo" if item.channels == 2 else "Canais: " ~ item.channels }}</span>
+                                        <span class="tag">💾 {{ (item.size_bytes / 1024 / 1024)|round(2) }} MB</span>
+                                        <span class="tag">📅 {{ item.created_at[:19]|replace("T", " ") if item.created_at else "" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Waveform Image -->
+                            {% if item.path_waveform %}
+                                <div class="waveform-container">
+                                    <img src="/audio/{{ item.id }}/waveform" alt="Forma de onda do áudio" loading="lazy">
+                                </div>
+                            {% endif %}
+
+                            <!-- Players de Áudio Original e Processado -->
+                            <div class="players-grid">
+                                <div class="player-box">
+                                    <div class="player-label">
+                                        <span>🎧 Áudio Original</span>
+                                        <span>{{ item.original_ext }}</span>
+                                    </div>
+                                    <audio controls preload="none">
+                                        <source src="/audio/{{ item.id }}/original" type="{{ item.mime_type }}">
+                                        Seu navegador não suporta reprodução de áudio.
+                                    </audio>
+                                </div>
+
+                                <div class="player-box">
+                                    <div class="player-label">
+                                        <span>✨ Áudio Processado</span>
+                                        <span style="color: var(--accent);">FFmpeg Result</span>
+                                    </div>
+                                    <audio controls preload="none">
+                                        <source src="/audio/{{ item.id }}/processed" type="{{ item.mime_type }}">
+                                        Seu navegador não suporta reprodução de áudio.
+                                    </audio>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="card-actions">
+                                <a href="/audio/{{ item.id }}/original" download class="btn-sm">
+                                    ⬇️ Baixar Original
+                                </a>
+                                <a href="/audio/{{ item.id }}/processed" download class="btn-sm">
+                                    ⬇️ Baixar Processado
+                                </a>
+                                <a href="/audio/{{ item.id }}/meta" target="_blank" class="btn-sm">
+                                    📋 meta.json
+                                </a>
+                                <button onclick="deleteAudio('{{ item.id }}')" class="btn-sm btn-danger">
+                                    🗑️ Mover para Lixeira
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Nenhum áudio armazenado ainda</h3>
+                    <p style="margin-top: 0.5rem;">
+                        Envie um arquivo acima ou pelo Cliente PySide6 para visualizar aqui.
+                    </p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        function handleOperationChange() {
+            const type = document.getElementById("processing_type").value;
+            document.getElementById("speedGroup").style.display = (type === "speed") ? "flex" : "none";
+            document.getElementById("bitrateGroup").style.display = (type === "bitrate") ? "flex" : "none";
+            document.getElementById("formatGroup").style.display = (type === "format_conversion") ? "flex" : "none";
+        }
+
+        async function deleteAudio(uuid) {
+            if (!confirm("Tem certeza que deseja mover este áudio para a pasta trash/?")) return;
+            try {
+                const res = await fetch(`/audio/${uuid}`, { method: 'DELETE' });
+                if (res.ok) {
+                    const card = document.getElementById(`card-${uuid}`);
+                    if (card) card.remove();
+                } else {
+                    alert("Erro ao excluir áudio.");
+                }
+            } catch (err) {
+                alert("Falha na comunicação com o servidor.");
+            }
+        }
+
+        // Feedback no envio
+        document.getElementById("uploadForm").onsubmit = function() {
+            const btn = document.getElementById("btnSubmit");
+            btn.disabled = true;
+            btn.innerText = "⏳ Processando com FFmpeg...";
+        };
+    </script>
+</body>
+</html>
+

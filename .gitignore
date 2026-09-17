@@ -1,0 +1,28 @@
+# Ambientes Virtuais
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Arquivos de dados temporários e bancos SQLite locais
+*.db
+*.sqlite3
+tests_temp_audio.db
+
+# Storage de áudios gerados pelo servidor (mantendo estrutura de diretórios)
+server/storage/20*
+server/storage/trash/*
+!server/storage/trash/.gitkeep
+
+# Arquivos de ambiente
+.env
+
+# Logs
+*.log
+
