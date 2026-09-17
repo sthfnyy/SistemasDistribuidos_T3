@@ -1,0 +1,8 @@
+SERVER_HOST = "127.0.0.1"
+
+SERVER_PORT = 8000
+
+
+API_URL = (
+    f"http://{SERVER_HOST}:{SERVER_PORT}"
+)
